@@ -107,6 +107,16 @@ func (h *AuthHandler) RegisterAdmin(c *fiber.Ctx) error {
 	})
 }
 
+// RenderLogin renders the admin login page
+func (h *AuthHandler) RenderLogin(c *fiber.Ctx) error {
+	return c.Render("admin-login", fiber.Map{})
+}
+
+// RenderDashboard renders the admin dashboard page
+func (h *AdminHandler) RenderDashboard(c *fiber.Ctx) error {
+	return c.Render("admin-dashboard", fiber.Map{})
+}
+
 type RegisterRequest struct {
 	Username string `json:"username" validate:"required,min=3,max=50"`
 	Password string `json:"password" validate:"required,min=6"`

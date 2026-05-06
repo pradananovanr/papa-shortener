@@ -80,8 +80,10 @@ func main() {
 	// Routes
 	app.Get("/health", urlHandler.HealthCheck)
 
-	// HTML pages
+	// HTML pages (order matters! /admin must be before /:code)
 	app.Get("/", urlHandler.RenderIndex)
+	app.Get("/admin/login", authHandler.RenderLogin)
+	app.Get("/admin", adminHandler.RenderDashboard)
 
 	// Auth routes (public)
 	api := app.Group("/api")
@@ -91,7 +93,7 @@ func main() {
 	// Shorten URL (public)
 	api.Post("/shorten", urlHandler.CreateShortURL)
 
-	// Admin routes (protected)
+	// Admin API routes (protected)
 	admin := api.Group("/admin", middleware.AuthRequired())
 	admin.Get("/urls", adminHandler.ListURLs)
 	admin.Get("/urls/:code", adminHandler.GetURL)
@@ -99,7 +101,7 @@ func main() {
 	admin.Delete("/urls/:code", adminHandler.DeleteURL)
 	admin.Post("/urls/:code/toggle", adminHandler.ToggleURLActive)
 
-	// Redirect route (must be last)
+	// Redirect route (must be LAST - catches all remaining paths)
 	app.Get("/:code", urlHandler.ResolveURL)
 
 	// Start server
