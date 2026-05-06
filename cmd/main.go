@@ -5,8 +5,6 @@ import (
 	"html/template"
 	"io"
 	"log"
-	"os"
-	"path/filepath"
 
 	"github.com/prdnnvnrnt/papa-shortener/internal/config"
 	"github.com/prdnnvnrnt/papa-shortener/internal/handler"
@@ -49,14 +47,20 @@ func main() {
 	}
 
 	// Auto migrate
-	if err := db.AutoMigrate(&model.URL{}); err != nil {
+	if err := db.AutoMigrate(&model.URL{}, &model.Admin{}); err != nil {
 		log.Fatal("Failed to migrate database:", err)
 	}
 
 	// Initialize layers
-	repo := repository.NewURLRepository(db)
-	svc := service.NewURLService(repo, config.AppCfg)
-	h := handler.NewURLHandler(svc)
+	urlRepo := repository.NewURLRepository(db)
+	adminRepo := repository.NewAdminRepository(db)
+	urlSvc := service.NewURLService(urlRepo, config.AppCfg)
+	authSvc := service.NewAuthService(adminRepo, config.AppCfg)
+	adminSvc := service.NewAdminService(urlRepo, config.AppCfg)
+
+	urlHandler := handler.NewURLHandler(urlSvc)
+	authHandler := handler.NewAuthHandler(authSvc)
+	adminHandler := handler.NewAdminHandler(adminSvc)
 
 	// Setup Fiber app
 	app := fiber.New(fiber.Config{
@@ -72,20 +76,31 @@ func main() {
 	// Middleware
 	app.Use(recover.New())
 	app.Use(cors.New())
-	app.Use(middleware.Logger())
 
 	// Routes
-	app.Get("/health", h.HealthCheck)
+	app.Get("/health", urlHandler.HealthCheck)
 
-	// HTML page
-	app.Get("/", h.RenderIndex)
+	// HTML pages
+	app.Get("/", urlHandler.RenderIndex)
 
-	// API routes
+	// Auth routes (public)
 	api := app.Group("/api")
-	api.Post("/shorten", h.CreateShortURL)
+	api.Post("/auth/login", authHandler.Login)
+	api.Post("/auth/register", authHandler.RegisterAdmin)
+
+	// Shorten URL (public)
+	api.Post("/shorten", urlHandler.CreateShortURL)
+
+	// Admin routes (protected)
+	admin := api.Group("/admin", middleware.AuthRequired())
+	admin.Get("/urls", adminHandler.ListURLs)
+	admin.Get("/urls/:code", adminHandler.GetURL)
+	admin.Put("/urls/:code", adminHandler.UpdateURL)
+	admin.Delete("/urls/:code", adminHandler.DeleteURL)
+	admin.Post("/urls/:code/toggle", adminHandler.ToggleURLActive)
 
 	// Redirect route (must be last)
-	app.Get("/:code", h.ResolveURL)
+	app.Get("/:code", urlHandler.ResolveURL)
 
 	// Start server
 	addr := fmt.Sprintf("%s:%d", config.AppCfg.App.Host, config.AppCfg.App.Port)
@@ -113,16 +128,4 @@ func (e *TemplateEngine) Load() error {
 	var err error
 	e.templates, err = template.ParseGlob("templates/*.html")
 	return err
-}
-
-// StaticDirHandler serves static files from ./static directory
-func StaticDirHandler(c *fiber.Ctx) error {
-	filePath := c.Params("*")
-	fullPath := filepath.Join("static", filePath)
-
-	if _, err := os.Stat(fullPath); os.IsNotExist(err) {
-		return c.Status(404).SendString("File not found")
-	}
-
-	return c.SendFile(fullPath)
 }

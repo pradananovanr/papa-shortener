@@ -2,10 +2,9 @@ package service
 
 import (
 	"errors"
-	"fmt"
 	"strings"
 
-"github.com/prdnnvnrnt/papa-shortener/internal/config"
+	"github.com/prdnnvnrnt/papa-shortener/internal/config"
 	"github.com/prdnnvnrnt/papa-shortener/internal/model"
 	"github.com/prdnnvnrnt/papa-shortener/internal/repository"
 	"github.com/prdnnvnrnt/papa-shortener/pkg/validator"
@@ -14,9 +13,9 @@ import (
 )
 
 var (
-	ErrInvalidCustomURL  = errors.New("invalid custom URL: must be 3-20 lowercase alphanumeric characters")
-	ErrCustomURLExists   = errors.New("custom URL already taken")
-	ErrURLNotFound       = errors.New("URL not found")
+	ErrInvalidCustomURL   = errors.New("invalid custom URL: must be 3-20 lowercase alphanumeric characters")
+	ErrCustomURLExists    = errors.New("custom URL already taken")
+	ErrURLNotFound        = errors.New("URL not found")
 	ErrInvalidOriginalURL = errors.New("invalid original URL format")
 )
 
@@ -42,12 +41,10 @@ func (s *urlService) generateShortCode() string {
 }
 
 func (s *urlService) CreateShortURL(req *model.CreateURLRequest) (*model.CreateURLResponse, error) {
-	// Validate original URL
 	if req.OriginalURL == "" {
 		return nil, ErrInvalidOriginalURL
 	}
 
-	// Ensure URL has scheme
 	original := req.OriginalURL
 	if !strings.HasPrefix(original, "http://") && !strings.HasPrefix(original, "https://") {
 		original = "https://" + original
@@ -56,16 +53,13 @@ func (s *urlService) CreateShortURL(req *model.CreateURLRequest) (*model.CreateU
 	isCustom := false
 	shortCode := s.generateShortCode()
 
-	// Handle custom URL if provided
 	if req.CustomURL != "" {
 		custom := strings.ToLower(req.CustomURL)
 
-		// Validate custom URL format
 		if !validator.IsValidCustomURL(custom) {
 			return nil, ErrInvalidCustomURL
 		}
 
-		// Check if custom URL already exists
 		exists, err := s.repo.ExistsByShortCode(custom)
 		if err != nil {
 			return nil, err
@@ -78,18 +72,18 @@ func (s *urlService) CreateShortURL(req *model.CreateURLRequest) (*model.CreateU
 		isCustom = true
 	}
 
-	// Create URL record
 	url := &model.URL{
 		ShortCode: shortCode,
 		Original:  original,
 		Custom:    isCustom,
+		Active:    true,
 	}
 
 	if err := s.repo.Create(url); err != nil {
 		return nil, err
 	}
 
-	fullShort := fmt.Sprintf("%s/%s", s.config.App.BaseURL, shortCode)
+	fullShort := s.config.App.BaseURL + "/" + shortCode
 
 	return &model.CreateURLResponse{
 		ShortCode: shortCode,
@@ -105,5 +99,11 @@ func (s *urlService) ResolveShortCode(code string) (string, error) {
 	if err != nil {
 		return "", ErrURLNotFound
 	}
+
+	// Check if URL is active
+	if !url.Active {
+		return "", ErrURLNotFound
+	}
+
 	return url.Original, nil
 }
