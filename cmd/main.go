@@ -106,7 +106,7 @@ func NewTemplateEngine() *TemplateEngine {
 }
 
 func (e *TemplateEngine) Render(w io.Writer, name string, bind interface{}, layout ...string) error {
-	return e.templates.ExecuteTemplate(w, name, bind)
+	return e.templates.ExecuteTemplate(w, name+".html", bind)
 }
 
 func (e *TemplateEngine) Load() error {
