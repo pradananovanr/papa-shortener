@@ -1,7 +1,7 @@
 package repository
 
 import (
-	"papa-shortener/internal/model"
+	"github.com/prdnnvnrnt/papa-shortener/internal/model"
 
 	"gorm.io/gorm"
 )

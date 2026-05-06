@@ -4,9 +4,9 @@ import (
 	"errors"
 	"fmt"
 
-	"papa-shortener/internal/config"
-	"papa-shortener/internal/model"
-	"papa-shortener/internal/service"
+	"github.com/prdnnvnrnt/papa-shortener/internal/config"
+	"github.com/prdnnvnrnt/papa-shortener/internal/model"
+	"github.com/prdnnvnrnt/papa-shortener/internal/service"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"

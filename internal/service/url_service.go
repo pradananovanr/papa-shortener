@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"strings"
 
-	"papa-shortener/internal/config"
-	"papa-shortener/internal/model"
-	"papa-shortener/internal/repository"
-	"papa-shortener/pkg/validator"
+"github.com/prdnnvnrnt/papa-shortener/internal/config"
+	"github.com/prdnnvnrnt/papa-shortener/internal/model"
+	"github.com/prdnnvnrnt/papa-shortener/internal/repository"
+	"github.com/prdnnvnrnt/papa-shortener/pkg/validator"
 
 	"github.com/google/uuid"
 )
