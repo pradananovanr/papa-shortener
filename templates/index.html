@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Papa Shortener - URL Shortener</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#6366f1',
+                        secondary: '#8b5cf6',
+                    }
+                }
+            }
+        }
+
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                alert('Copied: ' + text);
+            });
+        }
+    </script>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-800">
+    <div class="container mx-auto px-4 py-16">
+        <!-- Header -->
+        <div class="text-center mb-12">
+            <h1 class="text-5xl font-bold text-white mb-4">🔗 Papa Shortener</h1>
+            <p class="text-xl text-purple-200">Simple URL Shortener • Cepat • Mudah</p>
+        </div>
+
+        <!-- Main Card -->
+        <div class="max-w-2xl mx-auto">
+            <div class="bg-white/10 backdrop-blur-lg rounded-2xl shadow-2xl p-8 border border-white/20">
+
+                <!-- Create URL Form -->
+                <form hx-post="/api/shorten" hx-target="#result" hx-swap="innerHTML" class="space-y-6">
+                    <div>
+                        <label class="block text-white font-semibold mb-2">URL Asli</label>
+                        <input
+                            type="text"
+                            name="original_url"
+                            placeholder="https://example.com/very/long/url"
+                            required
+                            class="w-full px-4 py-3 rounded-xl bg-white/20 border border-white/30 text-white placeholder-purple-200 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                        >
+                    </div>
+
+                    <div>
+                        <label class="block text-white font-semibold mb-2">
+                            Custom URL <span class="text-purple-300 font-normal">(opsional)</span>
+                        </label>
+                        <div class="flex items-center">
+                            <span class="text-purple-300 mr-2">{{.BaseURL}}/</span>
+                            <input
+                                type="text"
+                                name="custom_url"
+                                placeholder="my-custom-url"
+                                pattern="[a-z0-9]{3,20}"
+                                title="3-20 karakter huruf kecil dan angka"
+                                class="flex-1 px-4 py-3 rounded-xl bg-white/20 border border-white/30 text-white placeholder-purple-200 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                            >
+                        </div>
+                        <p class="text-purple-300 text-sm mt-2">3-20 karakter • huruf kecil & angka saja</p>
+                    </div>
+
+                    <button
+                        type="submit"
+                        class="w-full py-4 bg-gradient-to-r from-primary to-secondary rounded-xl text-white font-bold text-lg hover:opacity-90 transition-all duration-200 shadow-lg hover:shadow-xl"
+                    >
+                        🚀 Generate Short URL
+                    </button>
+                </form>
+
+                <!-- Result Container -->
+                <div id="result" class="mt-8"></div>
+            </div>
+
+            <!-- Info Cards -->
+            <div class="grid md:grid-cols-2 gap-6 mt-8">
+                <div class="bg-white/10 backdrop-blur rounded-xl p-6 border border-white/20">
+                    <h3 class="text-white font-bold mb-2">📋 Cara Pakai</h3>
+                    <ol class="text-purple-200 text-sm space-y-2">
+                        <li>1. Masukkan URL asli yang mau di pendekin</li>
+                        <li>2. (Opsional)-custom short URL sendiri</li>
+                        <li>3. Klik Generate</li>
+                        <li>4. Copy & share! 🎉</li>
+                    </ol>
+                </div>
+                <div class="bg-white/10 backdrop-blur rounded-xl p-6 border border-white/20">
+                    <h3 class="text-white font-bold mb-2">✨ Fitur</h3>
+                    <ul class="text-purple-200 text-sm space-y-2">
+                        <li>• Custom short URL</li>
+                        <li>• Auto-generate kalau tidak custom</li>
+                        <li>• Instant redirect</li>
+                        <li>• Powered by Go + HTMX</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="text-center mt-12 text-purple-300">
+            Made with ❤️ by <a href="https://github.com/prdnnvnrnt" class="hover:text-white">prdnnvnrnt</a>
+        </div>
+    </div>
+</body>
+</html>

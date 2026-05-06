@@ -2,7 +2,11 @@ package main
 
 import (
 	"fmt"
+	"html/template"
+	"io"
 	"log"
+	"os"
+	"path/filepath"
 
 	"papa-shortener/internal/config"
 	"papa-shortener/internal/handler"
@@ -58,10 +62,11 @@ func main() {
 	app := fiber.New(fiber.Config{
 		ErrorHandler: func(c *fiber.Ctx, err error) error {
 			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-				"error": "internal_error",
+				"error":   "internal_error",
 				"message": err.Error(),
 			})
 		},
+		Views: NewTemplateEngine(),
 	})
 
 	// Middleware
@@ -71,6 +76,9 @@ func main() {
 
 	// Routes
 	app.Get("/health", h.HealthCheck)
+
+	// HTML page
+	app.Get("/", h.RenderIndex)
 
 	// API routes
 	api := app.Group("/api")
@@ -85,4 +93,36 @@ func main() {
 	if err := app.Listen(addr); err != nil {
 		log.Fatal("Failed to start server:", err)
 	}
+}
+
+// TemplateEngine implements fiber's ViewEngine for Go templates
+type TemplateEngine struct {
+	templates *template.Template
+}
+
+func NewTemplateEngine() *TemplateEngine {
+	tmpl := template.Must(template.ParseGlob("templates/*.html"))
+	return &TemplateEngine{templates: tmpl}
+}
+
+func (e *TemplateEngine) Render(w io.Writer, name string, bind interface{}, layout ...string) error {
+	return e.templates.ExecuteTemplate(w, name, bind)
+}
+
+func (e *TemplateEngine) Load() error {
+	var err error
+	e.templates, err = template.ParseGlob("templates/*.html")
+	return err
+}
+
+// StaticDirHandler serves static files from ./static directory
+func StaticDirHandler(c *fiber.Ctx) error {
+	filePath := c.Params("*")
+	fullPath := filepath.Join("static", filePath)
+
+	if _, err := os.Stat(fullPath); os.IsNotExist(err) {
+		return c.Status(404).SendString("File not found")
+	}
+
+	return c.SendFile(fullPath)
 }

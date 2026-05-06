@@ -2,7 +2,9 @@ package handler
 
 import (
 	"errors"
+	"fmt"
 
+	"papa-shortener/internal/config"
 	"papa-shortener/internal/model"
 	"papa-shortener/internal/service"
 
@@ -54,6 +56,29 @@ func (h *URLHandler) CreateShortURL(c *fiber.Ctx) error {
 
 	result, err := h.service.CreateShortURL(&req)
 	if err != nil {
+		// Check if HTMX request - return HTML error
+		if c.Get("HX-Request") == "true" {
+			var msg string
+			status := fiber.StatusBadRequest
+			if errors.Is(err, service.ErrCustomURLExists) {
+				msg = `<div class="mt-4 p-4 bg-red-500/20 border border-red-500/50 rounded-xl text-red-200">
+					<p class="font-semibold">❌ Custom URL sudah dipakai!</p>
+					<p class="text-sm mt-1">Coba pakai kombinasi lain.</p>
+				</div>`
+				status = fiber.StatusConflict
+			} else if errors.Is(err, service.ErrInvalidCustomURL) {
+				msg = `<div class="mt-4 p-4 bg-red-500/20 border border-red-500/50 rounded-xl text-red-200">
+					<p class="font-semibold">❌ Custom URL tidak valid</p>
+					<p class="text-sm mt-1">3-20 karakter huruf kecil & angka saja.</p>
+				</div>`
+			} else {
+				msg = `<div class="mt-4 p-4 bg-red-500/20 border border-red-500/50 rounded-xl text-red-200">
+					<p class="font-semibold">❌ Gagal membuat short URL</p>
+				</div>`
+			}
+			return c.Status(status).SendString(msg)
+		}
+
 		if errors.Is(err, service.ErrCustomURLExists) {
 			return c.Status(fiber.StatusConflict).JSON(model.ErrorResponse{
 				Error:   "custom_url_exists",
@@ -76,6 +101,28 @@ func (h *URLHandler) CreateShortURL(c *fiber.Ctx) error {
 			Error:   "internal_error",
 			Message: "Failed to create short URL",
 		})
+	}
+
+	// Check if HTMX request - return HTML success
+	if c.Get("HX-Request") == "true" {
+		badge := "🎲 Random"
+		if result.IsCustom {
+			badge = "✨ Custom"
+		}
+		html := fmt.Sprintf(`<div class="mt-4 p-6 bg-green-500/20 border border-green-500/50 rounded-xl">
+			<div class="flex items-center justify-between mb-3">
+				<span class="text-green-200 font-semibold">%s</span>
+				<button onclick="copyToClipboard('%s')" class="text-2xl hover:scale-110 transition">📋</button>
+			</div>
+			<div class="bg-white/10 rounded-lg p-3 mb-3">
+				<a href="%s" class="text-primary font-mono text-lg break-all hover:underline">%s</a>
+			</div>
+			<div class="text-sm text-green-200">
+				<p>Original: <span class="opacity-75">%s</span></p>
+			</div>
+		</div>
+		<script>hljs.highlightAll();</script>`, badge, result.FullShort, result.FullShort, result.FullShort, result.Original)
+		return c.Status(fiber.StatusCreated).SendString(html)
 	}
 
 	return c.Status(fiber.StatusCreated).JSON(result)
@@ -121,6 +168,14 @@ func (h *URLHandler) HealthCheck(c *fiber.Ctx) error {
 	return c.JSON(model.HealthResponse{
 		Status: "ok",
 	})
+}
+
+// RenderIndex renders the index HTML page
+func (h *URLHandler) RenderIndex(c *fiber.Ctx) error {
+	data := fiber.Map{
+		"BaseURL": config.AppCfg.App.BaseURL,
+	}
+	return c.Render("index", data)
 }
 
 func formatValidationErrors(err error) string {

@@ -28,6 +28,7 @@ RUN apk add --no-cache ca-certificates
 # Copy binary from builder
 COPY --from=builder /app/server .
 COPY --from=builder /app/config.yaml .
+COPY --from=builder /app/templates ./templates
 
 # Expose port
 EXPOSE 8080
