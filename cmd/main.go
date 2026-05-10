@@ -51,6 +51,24 @@ func main() {
 		log.Fatal("Failed to migrate database:", err)
 	}
 
+	// Seed default admin if configured and none exists
+	if config.AppCfg.App.DefaultAdminUser != "" && config.AppCfg.App.DefaultAdminPass != "" {
+		var count int64
+		db.Model(&model.Admin{}).Count(&count)
+		if count == 0 {
+			defaultAdmin := &model.Admin{
+				Username: config.AppCfg.App.DefaultAdminUser,
+			}
+			if err := defaultAdmin.SetPassword(config.AppCfg.App.DefaultAdminPass); err != nil {
+				log.Fatal("Failed to hash default admin password:", err)
+			}
+			if err := db.Create(defaultAdmin).Error; err != nil {
+				log.Fatal("Failed to create default admin:", err)
+			}
+			log.Printf("Default admin created: %s", config.AppCfg.App.DefaultAdminUser)
+		}
+	}
+
 	// Initialize layers
 	urlRepo := repository.NewURLRepository(db)
 	adminRepo := repository.NewAdminRepository(db)

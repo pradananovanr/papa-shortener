@@ -21,9 +21,11 @@ type DatabaseConfig struct {
 }
 
 type AppConfig struct {
-	Host    string `yaml:"host"`
-	Port    int    `yaml:"port"`
-	BaseURL string `yaml:"base_url"`
+	Host            string `yaml:"host"`
+	Port            int    `yaml:"port"`
+	BaseURL         string `yaml:"base_url"`
+	DefaultAdminUser     string `yaml:"default_admin_user"`
+	DefaultAdminPass     string `yaml:"default_admin_pass"`
 }
 
 var AppCfg *Config
