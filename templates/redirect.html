@@ -44,7 +44,7 @@
         </div>
 
         <p class="text-sm text-purple-200 mb-6" id="countdown-text">
-            Mengarahkan otomatis dalam <span class="font-bold text-white text-lg" id="timer">5</span> detik...
+            Mengarahkan otomatis dalam <span class="font-bold text-white text-lg" id="timer">10</span> detik...
         </p>
 
         <!-- Action Buttons -->
@@ -60,11 +60,11 @@
 
     <script>
         const originalUrl = "{{.OriginalURL}}";
-        let timeLeft = 5;
+        let timeLeft = 10;
         const timerElement = document.getElementById('timer');
         const progressElement = document.getElementById('progress');
         const intervalTime = 100; // Update progress every 100ms
-        const totalDuration = 5000; // 5 seconds
+        const totalDuration = 10000; // 10 seconds
         let currentDuration = 0;
 
         const countdownInterval = setInterval(() => {
