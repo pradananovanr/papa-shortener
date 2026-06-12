@@ -32,7 +32,7 @@ func (a *Admin) CheckPassword(password string) bool {
 
 type URL struct {
 	ID        uint           `gorm:"primaryKey" json:"id"`
-	ShortCode string         `gorm:"uniqueIndex;size:10;not null" json:"short_code"`
+	ShortCode string         `gorm:"uniqueIndex;size:255;not null" json:"short_code"`
 	Original  string         `gorm:"size:2048;not null" json:"original_url"`
 	Custom    bool           `gorm:"default:false" json:"is_custom"`
 	Active    bool           `gorm:"default:true" json:"is_active"`
@@ -42,8 +42,8 @@ type URL struct {
 }
 
 type CreateURLRequest struct {
-	OriginalURL string `json:"original_url" validate:"required,url"`
-	CustomURL   string `json:"custom_url" validate:"omitempty,alphanum,min=3,max=20"`
+	OriginalURL string `json:"original_url" form:"original_url" validate:"required,url"`
+	CustomURL   string `json:"custom_url" form:"custom_url" validate:"omitempty,min=3"`
 }
 
 type CreateURLResponse struct {
@@ -55,9 +55,9 @@ type CreateURLResponse struct {
 }
 
 type UpdateURLRequest struct {
-	OriginalURL string `json:"original_url,omitempty" validate:"omitempty,url"`
-	CustomURL   string `json:"custom_url,omitempty" validate:"omitempty,alphanum,min=3,max=20"`
-	Active      *bool  `json:"active,omitempty"`
+	OriginalURL string `json:"original_url,omitempty" form:"original_url,omitempty" validate:"omitempty,url"`
+	CustomURL   string `json:"custom_url,omitempty" form:"custom_url,omitempty" validate:"omitempty,min=3"`
+	Active      *bool  `json:"active,omitempty" form:"active,omitempty"`
 }
 
 type ErrorResponse struct {
@@ -71,8 +71,8 @@ type HealthResponse struct {
 }
 
 type LoginRequest struct {
-	Username string `json:"username" validate:"required"`
-	Password string `json:"password" validate:"required"`
+	Username string `json:"username" form:"username" validate:"required"`
+	Password string `json:"password" form:"password" validate:"required"`
 }
 
 type LoginResponse struct {

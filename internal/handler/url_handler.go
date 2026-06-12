@@ -69,7 +69,7 @@ func (h *URLHandler) CreateShortURL(c *fiber.Ctx) error {
 			} else if errors.Is(err, service.ErrInvalidCustomURL) {
 				msg = `<div class="mt-4 p-4 bg-red-500/20 border border-red-500/50 rounded-xl text-red-200">
 					<p class="font-semibold">❌ Custom URL tidak valid</p>
-					<p class="text-sm mt-1">3-20 karakter huruf kecil & angka saja.</p>
+					<p class="text-sm mt-1">Minimal 3 karakter alfanumerik, strip (-), atau underscore (_).</p>
 				</div>`
 			} else {
 				msg = `<div class="mt-4 p-4 bg-red-500/20 border border-red-500/50 rounded-xl text-red-200">
@@ -88,7 +88,7 @@ func (h *URLHandler) CreateShortURL(c *fiber.Ctx) error {
 		if errors.Is(err, service.ErrInvalidCustomURL) {
 			return c.Status(fiber.StatusBadRequest).JSON(model.ErrorResponse{
 				Error:   "invalid_custom_url",
-				Message: "Custom URL must be 3-20 lowercase alphanumeric characters only",
+				Message: "Custom URL must be at least 3 alphanumeric, hyphen, or underscore characters",
 			})
 		}
 		if errors.Is(err, service.ErrInvalidOriginalURL) {

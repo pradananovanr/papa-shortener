@@ -118,8 +118,8 @@ func (h *AdminHandler) RenderDashboard(c *fiber.Ctx) error {
 }
 
 type RegisterRequest struct {
-	Username string `json:"username" validate:"required,min=3,max=50"`
-	Password string `json:"password" validate:"required,min=6"`
+	Username string `json:"username" form:"username" validate:"required,min=3,max=50"`
+	Password string `json:"password" form:"password" validate:"required,min=6"`
 }
 
 type AdminHandler struct {

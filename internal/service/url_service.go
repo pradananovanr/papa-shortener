@@ -13,7 +13,7 @@ import (
 )
 
 var (
-	ErrInvalidCustomURL   = errors.New("invalid custom URL: must be 3-20 lowercase alphanumeric characters")
+	ErrInvalidCustomURL   = errors.New("invalid custom URL: must be at least 3 characters and consist of alphanumeric, hyphen, or underscore characters")
 	ErrCustomURLExists    = errors.New("custom URL already taken")
 	ErrURLNotFound        = errors.New("URL not found")
 	ErrInvalidOriginalURL = errors.New("invalid original URL format")
@@ -54,7 +54,7 @@ func (s *urlService) CreateShortURL(req *model.CreateURLRequest) (*model.CreateU
 	shortCode := s.generateShortCode()
 
 	if req.CustomURL != "" {
-		custom := strings.ToLower(req.CustomURL)
+		custom := req.CustomURL
 
 		if !validator.IsValidCustomURL(custom) {
 			return nil, ErrInvalidCustomURL
