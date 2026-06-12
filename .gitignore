@@ -5,9 +5,6 @@
 # Dependencies
 vendor/
 
-# Go sum
-go.sum
-
 # IDE
 .idea/
 .vscode/
