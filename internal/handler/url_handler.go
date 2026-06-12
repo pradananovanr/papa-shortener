@@ -115,7 +115,7 @@ func (h *URLHandler) CreateShortURL(c *fiber.Ctx) error {
 				<button onclick="copyToClipboard('%s')" class="text-2xl hover:scale-110 transition">📋</button>
 			</div>
 			<div class="bg-white/10 rounded-lg p-3 mb-3">
-				<a href="%s" class="text-primary font-mono text-lg break-all hover:underline">%s</a>
+				<a href="%s" target="_blank" class="text-yellow-300 font-mono text-lg break-all hover:underline">%s</a>
 			</div>
 			<div class="text-sm text-green-200">
 				<p>Original: <span class="opacity-75">%s</span></p>
@@ -154,7 +154,9 @@ func (h *URLHandler) ResolveURL(c *fiber.Ctx) error {
 		})
 	}
 
-	return c.Redirect(original, fiber.StatusTemporaryRedirect)
+	return c.Render("redirect", fiber.Map{
+		"OriginalURL": original,
+	})
 }
 
 // HealthCheck godoc

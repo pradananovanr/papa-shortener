@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mengalihkan... - Papa Shortener</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#6366f1',
+                        secondary: '#8b5cf6',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-800 flex items-center justify-center p-4">
+    <div class="max-w-md w-full bg-white/10 backdrop-blur-lg rounded-2xl shadow-2xl p-8 border border-white/20 text-center text-white">
+        <!-- Warning Icon -->
+        <div class="w-20 h-20 bg-amber-500/20 border border-amber-500/30 rounded-full flex items-center justify-center mx-auto mb-6 animate-pulse">
+            <span class="text-4xl">⚠️</span>
+        </div>
+
+        <h2 class="text-2xl font-bold mb-2">Konfirmasi Pengalihan</h2>
+        <p class="text-purple-200 text-sm mb-6">
+            Anda akan dialihkan ke situs eksternal. Pastikan URL di bawah ini aman sebelum melanjutkan.
+        </p>
+
+        <!-- Destination URL Card -->
+        <div class="bg-black/20 rounded-xl p-4 mb-6 text-left border border-white/10">
+            <span class="text-xs text-purple-300 block mb-1">URL Tujuan:</span>
+            <a href="{{.OriginalURL}}" class="text-yellow-300 font-mono text-sm break-all hover:underline" id="destination-link">
+                {{.OriginalURL}}
+            </a>
+        </div>
+
+        <!-- Progress bar/loader -->
+        <div class="w-full bg-white/10 h-2 rounded-full overflow-hidden mb-6">
+            <div id="progress" class="bg-gradient-to-r from-primary to-secondary h-full w-full transition-all duration-100 ease-linear"></div>
+        </div>
+
+        <p class="text-sm text-purple-200 mb-6" id="countdown-text">
+            Mengarahkan otomatis dalam <span class="font-bold text-white text-lg" id="timer">5</span> detik...
+        </p>
+
+        <!-- Action Buttons -->
+        <div class="flex flex-col gap-3">
+            <a href="{{.OriginalURL}}" class="w-full py-3 bg-gradient-to-r from-primary to-secondary rounded-xl text-white font-bold hover:opacity-90 transition shadow-lg text-center">
+                🚀 Lanjutkan Sekarang
+            </a>
+            <a href="/" class="w-full py-3 bg-white/10 hover:bg-white/20 border border-white/20 rounded-xl text-white font-semibold transition text-center">
+                ❌ Batal & Kembali
+            </a>
+        </div>
+    </div>
+
+    <script>
+        const originalUrl = "{{.OriginalURL}}";
+        let timeLeft = 5;
+        const timerElement = document.getElementById('timer');
+        const progressElement = document.getElementById('progress');
+        const intervalTime = 100; // Update progress every 100ms
+        const totalDuration = 5000; // 5 seconds
+        let currentDuration = 0;
+
+        const countdownInterval = setInterval(() => {
+            currentDuration += intervalTime;
+            const percentage = 100 - (currentDuration / totalDuration * 100);
+            progressElement.style.width = percentage + '%';
+
+            if (currentDuration % 1000 === 0) {
+                timeLeft--;
+                if (timerElement) {
+                    timerElement.textContent = timeLeft;
+                }
+            }
+
+            if (currentDuration >= totalDuration) {
+                clearInterval(countdownInterval);
+                window.location.href = originalUrl;
+            }
+        }, intervalTime);
+    </script>
+</body>
+</html>
