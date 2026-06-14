@@ -11,3 +11,6 @@ jobs:
     uses: pradananovanr/papa-ci-cd-collection/.github/workflows/pipeline.yml@master
     secrets:
       DOKPLOY_WEBHOOK_URL: ${{ secrets.DOKPLOY_WEBHOOK_URL }}
+    permissions:
+      contents: read
+      packages: write
