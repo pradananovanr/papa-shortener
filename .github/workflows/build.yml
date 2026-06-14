@@ -8,6 +8,6 @@ on:
 
 jobs:
   ci-cd:
-    uses: pradananovanr/papa-ci-cd-collection/.github/workflows/pipeline.yml@main
+    uses: pradananovanr/papa-ci-cd-collection/.github/workflows/pipeline.yml@master
     secrets:
       DOKPLOY_WEBHOOK_URL: ${{ secrets.DOKPLOY_WEBHOOK_URL }}
